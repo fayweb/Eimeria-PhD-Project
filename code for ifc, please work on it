@@ -1,0 +1,18 @@
+IFC1 <- read.csv("https://raw.githubusercontent.com/derele/Eimeria_Lab/master/data/Experiment_results/IFC1.csv")
+IFC2 <- read.csv("https://raw.githubusercontent.com/derele/Eimeria_Lab/master/data/Experiment_results/IFC2.csv")
+IFC3 <- read.csv("https://raw.githubusercontent.com/derele/Eimeria_Lab/master/data/Experiment_results/IFC3.csv")
+IFC4 <- read.csv("https://raw.githubusercontent.com/derele/Eimeria_Lab/master/data/Experiment_results/IFC4.csv")
+IFC5 <- read.csv("https://raw.githubusercontent.com/derele/Eimeria_Lab/master/data/Experiment_results/IFC5.csv")
+
+IFC <- bind_rows(IFC1, IFC2, IFC3, IFC4, IFC5)
+IFC$EH_ID <- as.character(sub("A0729", "AA0729", IFC$EH_ID))
+# remove unsuccessful amplifications
+IFC %>% 
+  filter(Value != 999, Call %in% "Pass") %>% 
+  group_by(EH_ID, Target) %>% 
+  summarise(
+    IFC_Ct_mean = mean(Value, na.rm=TRUE),
+    IFC_Ct_Var = var(Value, na.rm=TRUE),
+    IFC_Ct_N = n()
+    ) -> IFC
+table(IFC$IFC_Ct_N)
