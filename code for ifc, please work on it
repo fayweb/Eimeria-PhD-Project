@@ -16,3 +16,8 @@ IFC %>%
     IFC_Ct_N = n()
     ) -> IFC
 table(IFC$IFC_Ct_N)
+
+
+####### adjust IDs
+## change column name from EH_ID to Mouse_ID
+## change the row names from AXXX to AA_XXXX
