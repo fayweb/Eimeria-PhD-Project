@@ -16,6 +16,6 @@ str(Challenge)
 
 
 ggplot(Challenge, aes(dpi, fill = infection)) +
-  geom_bar(alpha = 0.8)
+  geom_bar(alpha = 0.8, position = "dodge") 
 
 ?as.factor
