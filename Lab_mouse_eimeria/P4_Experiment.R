@@ -28,10 +28,9 @@ P4_Full <- P4_FACS %>%
   left_join(P4_Design, by = "EH_ID") %>%
   select(!X)
 #%>%
- # select(!experiment) %>%
- # select(!challenge)
+# select(!experiment) %>%
+# select(!challenge)
 str(P4_Full)
-
 
 #read Experimental design P4
 P4_record <- read.csv("https://raw.githubusercontent.com/derele/Eimeria_Lab/master/data/Experiment_results/P4_082020_Eim_record.csv")
@@ -62,15 +61,9 @@ colnames(P4_Full) %in% colnames(Challenge_Infections) %>% table
 colnames(Challenge_Infections)
 
 
-#read E57 FAcs
-E57_FACS <- read.csv("https://raw.githubusercontent.com/derele/Eimeria_Lab/master/data/Experiment_results/E7_112018_Eim_FACS.csv")
-E57_FACS$EH_ID <- str_replace_all(E57_FACS$EH_ID, "LM_", "LM") #replace string values in EH_ID Column so that table matches the challenge infections table
-str(E57_FACS)
-colnames(E57_FACS)
+#write the table 
+write.csv(P4_Full, "/home/fay/Documents/GitHub/Eimeria-PhD-Project/Lab_mouse_eimeria/Products/P4_Experiment_joined", row.names = FALSE)
 
 
-#read E11 FACS
-E11_FACS <- read.csv("https://raw.githubusercontent.com/derele/Eimeria_Lab/master/data/Experiment_results/E11_012021_Eim_FACS.csv")
-E11_FACS$EH_ID <- str_replace_all(E11_FACS$EH_ID, "LM_", "LM") #replace string values in EH_ID Column so that table matches the challenge infections table
-str(E11_FACS)
-colnames(E11_FACS)
+#use the code of Emanuel on challenge infections to add the infection history and infection type variable 
+
