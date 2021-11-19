@@ -60,10 +60,18 @@ str(P4_Full)
 colnames(P4_Full) %in% colnames(Challenge_Infections) %>% table
 colnames(Challenge_Infections)
 
+#use the code of Emanuel on challenge infections to add the infection history and infection type variable 
+P4_Full %>% filter(!is.na(P4_Full)) %>%
+  
+  mutate(challenge_infection=ifelse(!experiment%in%"E57",
+                                    challenge_infection,
+                                    ifelse(challenge_infection%in%"E88", "UNI",
+                                           challenge_infection))) %>%
+  ## then correct the infection history
+  mutate(infection_history=paste0(primary_infection, "_",
+                                  challenge_infection)) 
+
 
 #write the table 
 write.csv(P4_Full, "/home/fay/Documents/GitHub/Eimeria-PhD-Project/Lab_mouse_eimeria/Products/P4_Experiment_joined", row.names = FALSE)
-
-
-#use the code of Emanuel on challenge infections to add the infection history and infection type variable 
 
