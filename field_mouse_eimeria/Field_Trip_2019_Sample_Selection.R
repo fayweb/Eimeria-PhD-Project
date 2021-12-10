@@ -18,14 +18,12 @@ Data <- rename(Data, Aspiculuris_sp = ASP, Syphacia_sp = SYP, Mastophorus_muris 
 write.csv(Data, "data_input/FU_Immune_Worms.csv", row.names = FALSE)
 
 #cell count columns from SOTA from MLN
-#CellCount.cols <- c( "Treg", "CD4", "Treg17", "Th1", "Th17", "CD8",
+#CellCount.cols <- c("CD4", "Treg17", "Th1", "Th17", "CD8",
                      #"Act_CD8", "IFNy_CD4", "IL17A_CD4", "IFNy_CD8")
-
-
 
 colnames(Data)
 
-
+#comparing Treg counts from spleen
 Treg_Sota <- SOTA %>%
   select(Mouse_ID, Treg)
 
@@ -37,8 +35,23 @@ Treg_FU <- Data %>%
 #see if there are any correlations between our data and fu data
 cor(Treg_FU$Treg, Treg_FU$Treg_Fu_Foxp3, use = "pairwise.complete.obs")
 
+#make a function to compare the next elements
+compare_and_correlate <- function(x, y) {
+  
+selection <- Data %>%
+    select(Mouse_ID, x) %>%
+    left_join(y %>% select(Mouse_ID, y), by = "Mouse_ID") %>%
+    mutate(x = as.numeric(x))
+  
+#see if there are any correlations between our data and fu data
+cor(SOTA$y, selection$x, use = "pairwise.complete.obs")
+}
+  
+#test the function 
+compare_and_correlate(`% Foxp3+ in CD4+ (Treg) mLN`, Treg)
 
-
+#see if there are any correlations between our data and fu data
+cor(CD4_Sota$CD4, Treg_FU$Treg_Fu_Foxp3, use = "pairwise.complete.obs")
 Data_Worms <- Data %>%
   select(c(Mouse_ID, Aspiculuris_sp, Syphacia_sp, Mastophorus_muris, Trichuris_muris))
 
