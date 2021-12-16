@@ -38,13 +38,16 @@ cor(Treg_FU$Treg, Treg_FU$Treg_Fu_Foxp3, use = "pairwise.complete.obs")
 #make a function to compare the next elements
 compare_and_correlate <- function(x, y) {
   
-selection <- Data %>%
-    select(Mouse_ID, x) %>%
-    left_join(y %>% select(Mouse_ID, y), by = "Mouse_ID") %>%
-    mutate(x = as.numeric(x))
+x_Sota <- SOTA %>%
+  select(Mouse_ID, x)
+
+y_FU <- Data %>%
+    select(Mouse_ID, y) %>%
+    left_join(x_Sota, by = "Mouse_ID") %>%
+    mutate(x = as.numeric(y))
   
 #see if there are any correlations between our data and fu data
-cor(SOTA$y, selection$x, use = "pairwise.complete.obs")
+cor(y_FU$y, x_SOTA$x, use = "pairwise.complete.obs")
 }
   
 #test the function 
