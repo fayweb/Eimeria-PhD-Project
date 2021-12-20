@@ -1,11 +1,13 @@
 library(tidyverse)
 library(dplyr)
 library(ggplot2)
+library(tidyverse)
+library(stringr)
 
 #reading our own field data
-SOTA <- read_csv("https://raw.githubusercontent.com/derele/Mouse_Eimeria_Field/master/data_products/SOTA_Data_Product.csv")
+SOTA <- read.csv("https://raw.githubusercontent.com/derele/Mouse_Eimeria_Field/master/data_products/SOTA_Data_Product.csv")
 
-Data <- read_csv("/localstorage/fay/Immuno_Fu/Immune_Data_FU.csv")
+Data <- read.csv("https://raw.githubusercontent.com/fayweb/Eimeria-PhD-Project/gh-pages/field_mouse_eimeria/Field%20trip%202019%20data%20sheet_Hongwei%2020211122_edit_Fay%20-%20Sheet2.csv")
 
 #cleaning
 #removing empty columns
@@ -15,46 +17,67 @@ Data <- remove_empty(Data, which = c("cols"), quiet = TRUE)
 Data <- rename(Data, Aspiculuris_sp = ASP, Syphacia_sp = SYP, Mastophorus_muris = MM, 
                 Trichuris_muris = TM) 
 
+
+#replace weird symbols or spaces in columnames with nothing
+names(Data) <- gsub(x = names(Data), pattern = "X..", replacement = "")
+names(Data) <- gsub(x = names(Data), pattern = " ", replacement = "")
+
+#apparently some values in observations contain the number and a *
+#what does the * even mean?
+#for analysis it has to be removed 
+#removed it in the excel files as r was not recognizing *
+
 write.csv(Data, "data_input/FU_Immune_Worms.csv", row.names = FALSE)
 
 #cell count columns from SOTA from MLN
-#CellCount.cols <- c("CD4", "Treg17", "Th1", "Th17", "CD8",
-                     #"Act_CD8", "IFNy_CD4", "IL17A_CD4", "IFNy_CD8")
+CellCount.cols <- c("CD4", "Treg17", "Th1", "Th17", "CD8", "Treg",
+                     "Act_CD8", "IFNy_CD4", "IL17A_CD4", "IFNy_CD8")
 
-colnames(Data)
+#select only mouse id from Data
+Data_Mouse_id <- Data %>%
+  select(Mouse_ID)
+
+#extract our immune data from sota
+SOTA_Immune <- SOTA %>%
+  select(Mouse_ID, all_of(CellCount.cols)) %>%
+  right_join(Data_Mouse_id, by = "Mouse_ID")
 
 #comparing Treg counts from spleen
 Treg_Sota <- SOTA %>%
   select(Mouse_ID, Treg)
 
 Treg_FU <- Data %>%
-  select(Mouse_ID, `% Foxp3+ in CD4+ (Treg) mLN`) %>%
-  left_join(Treg_Sota, by = "Mouse_ID") %>%
-  mutate(Treg_Fu_Foxp3 = as.numeric(`% Foxp3+ in CD4+ (Treg) mLN`))
+  select(Mouse_ID, Foxp3..in.CD4...Treg..mLN) %>%
+  left_join(Treg_Sota, by = "Mouse_ID")
 
 #see if there are any correlations between our data and fu data
-cor(Treg_FU$Treg, Treg_FU$Treg_Fu_Foxp3, use = "pairwise.complete.obs")
+cor(Treg_FU$Treg, Treg_FU$Foxp3..in.CD4...Treg..mLN, use = "pairwise.complete.obs")
 
-#make a function to compare the next elements
-compare_and_correlate <- function(x, y) {
-  
-x_Sota <- SOTA %>%
-  select(Mouse_ID, x)
+#now for CD8
 
-y_FU <- Data %>%
-    select(Mouse_ID, y) %>%
-    left_join(x_Sota, by = "Mouse_ID") %>%
-    mutate(x = as.numeric(y))
-  
-#see if there are any correlations between our data and fu data
-cor(y_FU$y, x_SOTA$x, use = "pairwise.complete.obs")
-}
-  
-#test the function 
-compare_and_correlate(`% Foxp3+ in CD4+ (Treg) mLN`, Treg)
+CD8_Sota <- SOTA %>%
+  select(Mouse_ID, CD8)
+
+CD8_FU <- Data %>%
+  select(Mouse_ID, CD8..spleen) %>%
+  left_join(CD8_Sota, by = "Mouse_ID")
+
+CD8_FU <- CD8_FU[complete.cases(CD8_FU), ]
+
+CD8_FU <- CD8_FU %>%
+  mutate(CD8..spleen = as.numeric(CD8..spleen))
 
 #see if there are any correlations between our data and fu data
-cor(CD4_Sota$CD4, Treg_FU$Treg_Fu_Foxp3, use = "pairwise.complete.obs")
+
+cor(CD8_FU$CD8, CD8_FU$CD8..spleen, use = "pairwise.complete.obs")
+
+
+  
+
+
+
+
+
 Data_Worms <- Data %>%
   select(c(Mouse_ID, Aspiculuris_sp, Syphacia_sp, Mastophorus_muris, Trichuris_muris))
 
